@@ -1,7 +1,9 @@
 # Astor
 "Prompts that flow in a graceful dance"
 
-<img width="469" alt="Screenshot 2025-03-06 at 05 56 05" src="https://github.com/user-attachments/assets/5179ef49-efe8-44a6-bd97-87eb00337577" />
+<p align="center">
+  <img width="768" alt="Screenshot 2025-03-06 at 07 40 27" src="https://github.com/user-attachments/assets/79df47f3-5ea0-4b8a-a9af-960b92539e83" />
+</p>
 
 A lightweight, flexible library for building AI agent workflows with LLMs.
 
