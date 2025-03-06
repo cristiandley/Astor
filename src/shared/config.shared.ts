@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-    serverPort: z.number().default(3000),
     openAiKey: z.string().optional(),
     environment: z
         .enum(["development", "production", "test"])
@@ -17,7 +16,6 @@ function configure(): Config {
     const env = {
         openAiKey: Bun.env.OPENAI_API_KEY,
         environment: Bun.env.NODE_ENV as any,
-        serverPort: Number.parseInt(Bun.env.SERVER_PORT || "3000", 10),
         logLevel: Bun.env.LOG_LEVEL as any,
         defaultModel: Bun.env.DEFAULT_MODEL,
         batchConcurrency: Number.parseInt(Bun.env.BATCH_CONCURRENCY || "5", 10),

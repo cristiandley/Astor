@@ -373,7 +373,6 @@ console.log(config.defaultModel);
 ```
 
 **Properties:**
-- `serverPort`: HTTP server port (default: 3000)
 - `openAiKey`: OpenAI API key
 - `environment`: Runtime environment ('development', 'production', 'test')
 - `logLevel`: Default log level ('debug', 'info', 'warn', 'error')
