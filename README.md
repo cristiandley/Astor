@@ -1,9 +1,13 @@
 # Astor
-"Set those Agents to dance"
+"Prompts that flow in a graceful dance"
 
-
+<img width="469" alt="Screenshot 2025-03-06 at 05 56 05" src="https://github.com/user-attachments/assets/5179ef49-efe8-44a6-bd97-87eb00337577" />
 
 A lightweight, flexible TypeScript framework for building AI agent workflows with LLMs.
+
+## Why ?
+
+Im tired of langchain/llamaindex.
 
 ## Overview
 
