@@ -1,0 +1,27 @@
+{
+  "name": "astor",
+  "module": "index.ts",
+  "type": "module",
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "ai",
+    "workflow",
+    "agent",
+    "chain",
+    "llm",
+    "functional"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "consola": "^3.4.0",
+    "zod": "^3.24.2"
+  }
+}
