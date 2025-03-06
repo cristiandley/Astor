@@ -1,6 +1,6 @@
 {
   "name": "astor-agentic",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A functional workflow and agent library for LLM applications",
   "type": "module",
   "main": "./dist/cjs/index.js",
