@@ -9,9 +9,10 @@ A lightweight, flexible library for building AI agent workflows with LLMs.
 
 ## Overview
 
-Astor provides a clean, composable API for creating AI agent workflows. It allows you to:
+While working on a side project, I realized that the available agentic libraries for Bun and Node.js were lacking in quality and composability. 
+That challenge inspired me to create Astor... a clean, composable API for building AI agent workflows. With Astor, you can:
 
-- Build multi-step workflows with complex branching logic.
+- Build multi-step workflows with complex branching logic `.step(A).then(B).after(A).step(C)`.
 - Define custom tools and toolkits for agent use.
 - Chain multiple agents together for complex tasks.
 - Handle validation, error management, and logging consistently.
