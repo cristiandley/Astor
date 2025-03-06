@@ -27,8 +27,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
-
-    "include": ["src/**/*"],
-    "exclude": ["node_modules", "dist", "examples", "tests"]
-  }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "examples", "tests", "**/*.test.ts"]
 }

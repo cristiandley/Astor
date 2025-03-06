@@ -3,7 +3,7 @@
 
 <img width="469" alt="Screenshot 2025-03-06 at 05 56 05" src="https://github.com/user-attachments/assets/5179ef49-efe8-44a6-bd97-87eb00337577" />
 
-A lightweight, flexible TypeScript framework for building AI agent workflows with LLMs.
+A lightweight, flexible library for building AI agent workflows with LLMs.
 
 ## Why ?
 
@@ -13,18 +13,18 @@ Im tired of langchain/llamaindex.
 
 Astor provides a clean, composable API for creating AI agent workflows. It allows you to:
 
-- Create agents using various LLM providers
-- Build multi-step workflows with complex branching logic
-- Define custom tools and toolkits for agent use
-- Chain multiple agents together for complex tasks
-- Handle validation, error management, and logging consistently
+- Build multi-step workflows with complex branching logic.
+- Define custom tools and toolkits for agent use.
+- Chain multiple agents together for complex tasks.
+- Handle validation, error management, and logging consistently.
+- - ~~Create agents using various LLM providers~~ is a desire, rn only openai.
 
 ## Installation
 
 ```bash
-npm install astor-agent-framework
+bun add astor-agentic
 # or
-yarn add astor-agent-framework
+npm install astor-agentic
 ```
 
 ## Quick Start

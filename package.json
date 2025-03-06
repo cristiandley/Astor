@@ -1,7 +1,37 @@
 {
-  "name": "astor",
-  "module": "index.ts",
+  "name": "astor-agentic",
+  "version": "0.1.1",
+  "description": "A functional workflow and agent library for LLM applications",
   "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist/types",
+    "build:esm": "bun build ./src/index.ts --outdir ./dist/esm --target node --format esm",
+    "build:cjs": "bun build ./src/index.ts --outdir ./dist/cjs --target node --format cjs",
+    "build": "bun run clean && bun run build:types && bun run build:esm && bun run build:cjs",
+    "test": "bun test",
+    "prepublishOnly": "bun run build"
+  },
   "keywords": [
     "cloudflare",
     "workers",
@@ -14,14 +44,19 @@
   ],
   "author": "",
   "license": "MIT",
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cristiandley/astor.git"
   },
   "dependencies": {
     "consola": "^3.4.0",
     "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
