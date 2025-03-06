@@ -30,7 +30,7 @@ npm install astor-agentic
 ## Quick Start
 
 ```typescript
-import { createAgent, createStep, createWorkflow, openai } from 'astor-agent-framework';
+import { createAgent, createStep, createWorkflow, openai } from 'astor-agentic';
 
 // Create an agent
 const assistant = createAgent({
