@@ -37,6 +37,7 @@ npm install astor-agentic
     - [Logger](#logger)
     - [Configuration](#configuration)
 - [Types](#types)
+- [Examples](#examples)
 
 ## Core Components
 
@@ -569,3 +570,26 @@ interface Logger {
   trace(message: string, ...args: any[]): void;
 }
 ```
+
+## Examples
+
+Astor comes with several example files to help you get started:
+
+- **simple.example.ts**: Basic workflow with an agent that processes a query and generates a response
+- **tools.example.ts**: Demonstrates how to create and use custom tools with an agent
+- **agents.example.ts**: Shows how to create specialized agents with different instructions and models
+- **chain.example.ts**: Illustrates combining agents and workflow steps in a chain for content enhancement
+- **agents-and-tools.example.ts**: Example of a single agent using multiple tools for research and translation
+
+Run any example with:
+
+```bash
+bun examples/simple.example.ts
+```
+
+These examples demonstrate key patterns and best practices for building with Astor, including:
+- Proper workflow structuring
+- Tool creation and usage
+- Agent specialization
+- Chain organization
+- Visual logging and progress tracking

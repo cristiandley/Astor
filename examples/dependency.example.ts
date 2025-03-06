@@ -5,7 +5,7 @@ import {
     createWorkflow,
     openai,
     createLogger
-} from '@src/index';
+} from '../src';
 
 // Create a dedicated logger for this example
 const logger = createLogger({ level: 'info' });
