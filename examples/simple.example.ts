@@ -5,7 +5,7 @@ import {
     createWorkflow,
     openai,
     createLogger
-} from '@src/index';
+} from '../src';
 
 // Create a dedicated logger for this example
 const logger = createLogger({ level: 'debug' });
@@ -28,6 +28,7 @@ const validateInputStep = createStep({
     id: 'validate-input',
     description: 'Validate user input',
     inputSchema: conversationSchema,
+    // @ts-ignore
     execute: async ({ input }) => {
         // Log the input we received from the trigger
         logger.debug(`Received input: ${JSON.stringify(input)}`);
@@ -39,6 +40,7 @@ const validateInputStep = createStep({
 const generateResponseStep = createStep({
     id: 'generate-response',
     description: 'Generate response using LLM',
+    // @ts-ignore
     execute: async ({ input, context }) => {
         // Log what we received from the previous step
         logger.debug(`Generate response received input: ${JSON.stringify(input)}`);
