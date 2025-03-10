@@ -1,5 +1,4 @@
 import { zodToJsonSchema } from "@shared/zod.shared";
-import config from "./shared/config.shared";
 import type { Tool } from "./tools.core";
 
 export type ModelProvider = {
@@ -19,7 +18,7 @@ export type StreamOptions = {
 
 export type ToolCall = {
 	id: string;
-	type: string; // Changed from literal 'function' to string to allow for different types
+	type: string;
 	function: {
 		name: string;
 		arguments: string;
@@ -108,6 +107,7 @@ export function createAgent(config: AgentConfig): Agent {
 
 			// Don't pass empty tools array
 			if (combinedOptions.tools && combinedOptions.tools.length === 0) {
+				// biome-ignore lint/performance/noDelete: <explanation>
 				delete combinedOptions.tools;
 			}
 
@@ -129,30 +129,37 @@ export function createAgent(config: AgentConfig): Agent {
 }
 
 export type OpenAIConfig = {
-	apiKey?: string;
+	apiKey: string; // No longer optional - must be provided
 	baseUrl?: string;
 	organization?: string;
 	temperature?: number;
 	maxTokens?: number;
+	defaultModel?: string;
 };
 
 export function openai(
-	modelName?: string,
-	options?: OpenAIConfig,
+	modelName: string,
+	options: OpenAIConfig, // Required parameter
 ): ModelProvider {
 	return {
 		async stream(
 			messages: Message[],
 			streamOptions?: StreamOptions,
 		): Promise<StreamResponse> {
-			// Default options using application config
-			const apiKey = options?.apiKey || config.openAiKey;
-			const baseUrl = options?.baseUrl || "https://api.openai.com/v1";
-			const model = modelName || config.defaultModel;
+			// Use provided options directly
+			const apiKey = options.apiKey;
+			const baseUrl = options.baseUrl || "https://api.openai.com/v1";
+			const model = modelName || options.defaultModel;
 
 			if (!apiKey) {
 				throw new Error(
-					"OpenAI API key is required. Set it in options, as OPENAI_API_KEY environment variable, or in your config.",
+					"OpenAI API key is required. Provide it in the options when creating the model.",
+				);
+			}
+
+			if (!model) {
+				throw new Error(
+					"Model name is required. Provide it either as the first parameter or in options.defaultModel.",
 				);
 			}
 
@@ -167,8 +174,6 @@ export function openai(
 
 				// Process the stream chunks
 				let buffer = "";
-				const partialToolCall: Partial<ToolCall> = {};
-				const activeToolCalls: Record<number, Partial<ToolCall>> = {};
 
 				while (true) {
 					const { done, value } = await reader.read();
@@ -334,12 +339,15 @@ export function openai(
 												}
 
 												if (delta.function.name) {
+													// biome-ignore lint/style/noNonNullAssertion: <explanation>
 													toolCalls[delta.index].function!.name =
 														delta.function.name;
 												}
 
 												if (delta.function.arguments) {
+													// biome-ignore lint/style/noNonNullAssertion: <explanation>
 													toolCalls[delta.index].function!.arguments =
+														// biome-ignore lint/style/noNonNullAssertion: <explanation>
 														(toolCalls[delta.index].function!.arguments || "") +
 														delta.function.arguments;
 												}
@@ -389,8 +397,8 @@ export function openai(
 				const body: any = {
 					model,
 					messages,
-					temperature: options?.temperature ?? 0.7,
-					max_tokens: options?.maxTokens,
+					temperature: options.temperature ?? 0.7,
+					max_tokens: options.maxTokens,
 					stream: true,
 				};
 
@@ -409,7 +417,7 @@ export function openai(
 					headers: {
 						"Content-Type": "application/json",
 						Authorization: `Bearer ${apiKey}`,
-						...(options?.organization
+						...(options.organization
 							? { "OpenAI-Organization": options.organization }
 							: {}),
 					},

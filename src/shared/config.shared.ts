@@ -1,41 +1,52 @@
 import { z } from "zod";
 
-const envSchema = z.object({
-	openAiKey: z.string().optional(),
+/**
+ * Configuration schema
+ */
+export const configSchema = z.object({
+	openAIKey: z.string().optional(),
 	environment: z
 		.enum(["development", "production", "test"])
 		.default("development"),
 	logLevel: z.enum(["debug", "info", "warn", "error"]).default("info"),
-	defaultModel: z.string().default("gpt-4o-mini"),
+	defaultModel: z.string().default("gpt-4o"),
 	batchConcurrency: z.number().min(1).max(10).default(3),
 });
 
-export type Config = z.infer<typeof envSchema>;
+/**
+ * Configuration type
+ */
+export type Config = z.infer<typeof configSchema>;
 
-function configure(): Config {
-	const env = {
-		openAiKey: Bun.env.OPENAI_API_KEY,
-		environment: Bun.env.NODE_ENV as any,
-		logLevel: Bun.env.LOG_LEVEL as any,
-		defaultModel: Bun.env.DEFAULT_MODEL,
-		batchConcurrency: Number.parseInt(Bun.env.BATCH_CONCURRENCY || "5", 10),
-	};
+/**
+ * Default configuration
+ */
+export const defaultConfig: Config = {
+	openAIKey: undefined,
+	environment: "development",
+	logLevel: "info",
+	defaultModel: "gpt-4o",
+	batchConcurrency: 3,
+};
 
+/**
+ * Validate and merge configuration
+ */
+export function createConfig(userConfig: Partial<Config> = {}): Config {
 	try {
-		return envSchema.parse(env);
+		return configSchema.parse({
+			...defaultConfig,
+			...userConfig,
+		});
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			console.error("Environment validation error:");
+			console.error("Configuration validation error:");
 			for (const issue of error.issues) {
 				console.error(`  - ${issue.path.join(".")}: ${issue.message}`);
 			}
 		} else {
-			console.error("Environment validation error:", error);
+			console.error("Configuration error:", error);
 		}
-		process.exit(1);
+		throw new Error("Invalid configuration");
 	}
 }
-
-const config = configure();
-
-export default config;

@@ -22,8 +22,8 @@
 	"scripts": {
 		"clean": "rm -rf dist",
 		"build:types": "tsc -p tsconfig.types.json",
-		"build:esm": "bun build ./src/index.ts --outdir ./dist/esm --target node --format esm",
-		"build:cjs": "bun build ./src/index.ts --outdir ./dist/cjs --target node --format cjs",
+		"build:esm": "bun build src/astor.core.ts --outdir ./dist/esm --target node --format esm",
+		"build:cjs": "bun build src/astor.core.ts --outdir ./dist/cjs --target node --format cjs",
 		"build": "bun run clean && bun run build:types && bun run build:esm && bun run build:cjs",
 		"test": "bun test",
 		"prepublishOnly": "bun run build"

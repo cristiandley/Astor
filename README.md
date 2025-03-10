@@ -5,591 +5,245 @@
   <img width="768" alt="Screenshot 2025-03-06 at 07 40 27" src="https://github.com/user-attachments/assets/79df47f3-5ea0-4b8a-a9af-960b92539e83" />
 </p>
 
-A lightweight, flexible library for building AI agent workflows with LLMs.
+Astor is a flexible TypeScript library for building AI workflows with a simple, intuitive API. It combines the power of workflow orchestration with the latest AI capabilities from the AI SDK.
 
-## Overview
+## Features
 
-While working on a side project, I realized that the available agentic libraries for Bun and Node.js were lacking in quality and composability. 
-That challenge inspired me to create Astor... a clean, composable API for building AI agent workflows. With Astor, you can:
-
-- Build multi-step workflows with complex branching logic `.step(A).then(B).after(A).step(C)`.
-- Define custom tools and toolkits for agent use.
-- Chain multiple agents together for complex tasks.
-- Handle validation, error management, and logging consistently.
-- - ~~Create agents using various LLM providers~~ is a desire, rn only openai.
+- **Workflow System**: Build complex, multi-step workflows with dependencies, branching, and conditional execution
+- **Intuitive API**: Natural API design with method names like `Workflow()`, `Step()`, and `Tool()`
+- **AI-Native**: Seamless integration with the AI SDK for text generation, structured data, and ~~streaming responses~~
+- **Type-Safe**: Full TypeScript support with generics for schema validation
+- **Extensible**: Build your own custom steps, tools, and workflows
+- **Easy to Use**: Simple, declarative syntax for defining complex AI pipelines
 
 ## Installation
 
 ```bash
-bun add astor-agentic
+bun add astor 
 # or
-npm install astor-agentic
+npm install astor
 ```
 
-## Table of Contents
-- [Core Components](#core-components)
-    - [Agents](#agents)
-    - [Steps](#steps)
-    - [Workflows](#workflows)
-    - [Tools](#tools)
-    - [Chains](#chains)
-- [Shared Utilities](#shared-utilities)
-    - [Logger](#logger)
-    - [Configuration](#configuration)
-- [Types](#types)
-- [Examples](#examples)
-
-## Core Components
-
-### Agents
-
-Agents encapsulate LLM calls with specific instructions and model configurations.
-
-#### `createAgent(config: AgentConfig): Agent`
-
-Creates a new agent that can process messages using an LLM.
+## Quick Start
 
 ```typescript
-import { createAgent, openai } from 'astor-agentic';
-
-const agent = createAgent({
-  name: 'My Assistant',
-  instructions: 'You are a helpful AI assistant...',
-  model: openai('gpt-4o')
-});
-```
-
-**Parameters:**
-- `config`: The agent configuration object
-    - `name`: A descriptive name for the agent
-    - `instructions`: System prompt instructions for the agent
-    - `model`: The model provider (e.g., from `openai()`)
-
-**Returns:**
-- An `Agent` object with:
-    - `config`: The original configuration
-    - `stream(messages: Message[])`: Method to stream responses from the LLM
-
-#### `openai(modelName?: string, options?: OpenAIConfig): ModelProvider`
-
-Creates an OpenAI model provider for use with an agent.
-
-```typescript
-import { openai } from 'astor-agentic';
-
-const model = openai('gpt-4o', {
-  temperature: 0.7,
-  maxTokens: 500
-});
-```
-
-**Parameters:**
-- `modelName`: OpenAI model name (defaults to config.defaultModel)
-- `options`: Configuration options
-    - `apiKey`: OpenAI API key (defaults to environment variable)
-    - `baseUrl`: API base URL (defaults to 'https://api.openai.com/v1')
-    - `organization`: OpenAI organization ID
-    - `temperature`: Sampling temperature (0-1)
-    - `maxTokens`: Maximum tokens to generate
-
-**Returns:**
-- A `ModelProvider` object that can be used with `createAgent()`
-
-### Steps
-
-Steps are individual units of execution in a workflow.
-
-#### `createStep(config: StepConfig): Step`
-
-Creates a new step that can be added to a workflow.
-
-```typescript
-import { createStep } from 'astor-agentic';
+import Astor from 'astor';
 import { z } from 'zod';
 
-const myStep = createStep({
-  id: 'process-data',
-  description: 'Process input data',
-  inputSchema: z.object({
-    data: z.array(z.string())
-  }),
-  execute: async ({ input, context }) => {
-    // Process the data
-    return { processed: true, result: input.data.map(item => item.toUpperCase()) };
-  }
-});
-```
-
-**Parameters:**
-- `config`: The step configuration object
-    - `id`: Unique identifier for the step
-    - `description`: Description of what the step does
-    - `inputSchema` (optional): Zod schema for input validation
-    - `execute`: Async function that performs the step's operation
-
-**Returns:**
-- A `Step` object with:
-    - `config`: The original configuration
-    - `execute({ input, context })`: Method to execute the step
-
-### Workflows
-
-Workflows combine steps into a coherent process with defined execution flow.
-
-#### `createWorkflow(config: WorkflowConfig): Workflow`
-
-Creates a new workflow that can execute a series of steps.
-
-```typescript
-import { createWorkflow } from 'astor-agentic';
-import { z } from 'zod';
-
-const workflow = createWorkflow({
-  name: 'Data Processing',
-  triggerSchema: z.object({
-    userId: z.string(),
-    data: z.array(z.string())
-  }),
-  logger: myLogger
-});
-```
-
-**Parameters:**
-- `config`: The workflow configuration object
-    - `name`: A descriptive name for the workflow
-    - `triggerSchema` (optional): Zod schema for validating trigger data
-    - `logger` (optional): Logger instance
-
-**Returns:**
-- A `Workflow` object with builder methods:
-    - `step(stepDefinition, options?)`: Add a step to the workflow
-    - `then(stepDefinition, options?)`: Add a step that runs after the previous step
-    - `after(stepId | stepIds[])`: Specify dependencies for the next step
-    - `createRun()`: Creates a runnable instance of the workflow
-    - `commit()`: Finalizes the workflow definition
-
-#### Workflow Builder Methods
-
-##### `step(stepDefinition: Step, options?: StepOptions): Workflow`
-
-Adds a step to the workflow.
-
-**Parameters:**
-- `stepDefinition`: The step to add
-- `options` (optional):
-    - `when`: Conditional execution rule
-    - `variables`: Variable mappings
-
-**Returns:**
-- The workflow instance (for chaining)
-
-##### `then(stepDefinition: Step, options?: StepOptions): Workflow`
-
-Adds a step that runs after the previous step.
-
-**Parameters:**
-- `stepDefinition`: The step to add
-- `options` (optional): Same as `step()` options
-
-**Returns:**
-- The workflow instance (for chaining)
-
-##### `after(stepId: string | string[]): Workflow`
-
-Specifies dependencies for the next step to be added.
-
-**Parameters:**
-- `stepId`: ID of the step(s) that must complete before the next step
-
-**Returns:**
-- The workflow instance (for chaining)
-
-##### `commit(): Workflow`
-
-Finalizes the workflow definition and checks for validity.
-
-**Returns:**
-- The validated workflow instance
-
-#### Workflow Execution
-
-##### `createRun()`
-
-Creates a runnable instance of the workflow.
-
-**Returns:**
-- An object with a `run()` method:
-    - `run({ triggerData: any }): Promise<{ results: Record<string, any> }>`
-
-### Tools
-
-Tools are specialized functions that can be used by agents or steps.
-
-#### `createTool(definition: ToolDefinition): Tool`
-
-Creates a new tool that can be added to a toolkit.
-
-```typescript
-import { createTool } from 'astor-agentic';
-import { z } from 'zod';
-
-const weatherTool = createTool({
-  name: 'getWeather',
-  description: 'Get weather information for a location',
-  parameters: z.object({
-    location: z.string(),
-    units: z.enum(['metric', 'imperial']).default('metric')
-  }),
-  execute: async ({ location, units }) => {
-    // Fetch weather data
-    return { temperature: 22, conditions: 'sunny' };
-  }
-});
-```
-
-**Parameters:**
-- `definition`: The tool definition object
-    - `name`: Unique identifier for the tool
-    - `description`: Description of what the tool does
-    - `parameters`: Zod schema for parameters
-    - `execute`: Async function that performs the tool's operation
-
-**Returns:**
-- A `Tool` object with:
-    - `definition`: The original definition
-    - `execute(params)`: Method to execute the tool
-
-#### `createToolkit(config: ToolkitConfig): Toolkit`
-
-Creates a new toolkit to group related tools.
-
-```typescript
-import { createToolkit } from 'astor-agentic';
-
-const weatherToolkit = createToolkit({
-  name: 'Weather Tools',
-  description: 'Tools for weather data',
-  logger: myLogger
+// Initialize Astor
+const astor = new Astor({
+  openAIKey: Bun.env.OPENAI_API_KEY,
+  defaultModel: 'gpt-4o'
 });
 
-weatherToolkit.addTool(weatherTool);
-```
-
-**Parameters:**
-- `config`: The toolkit configuration object
-    - `name`: A descriptive name for the toolkit
-    - `description` (optional): Description of the toolkit
-    - `logger` (optional): Logger instance
-
-**Returns:**
-- A `Toolkit` object with:
-    - `config`: The original configuration
-    - `tools`: Record of contained tools
-    - `addTool(tool)`: Method to add a tool
-    - `getTool(name)`: Method to retrieve a tool
-    - `getToolsSchema()`: Method to get schema for all tools
-
-### Chains
-
-Chains are collections of agents and workflows.
-
-#### `createChain(config: ChainConfig): Chain`
-
-Creates a new chain that can manage multiple agents and workflows.
-
-```typescript
-import { createChain } from 'astor-agentic';
-
-const chain = createChain({
-  agents: { 
-    assistant: myAgent 
-  },
-  workflows: { 
-    dataProcessing: myWorkflow 
-  },
-  logger: myLogger
+// Create a simple AI workflow
+const workflow = astor.SimpleWorkflow({
+  name: 'Quick Responder',
+  model: astor.openai('gpt-4o'),
+  systemPrompt: 'You are a helpful assistant.'
 });
-```
 
-**Parameters:**
-- `config`: The chain configuration object
-    - `agents` (optional): Record of agents
-    - `workflows` (optional): Record of workflows
-    - `logger` (optional): Logger instance
-
-**Returns:**
-- A `Chain` object with:
-    - `config`: The original configuration
-    - `agents`: Record of agents
-    - `workflows`: Record of workflows
-    - `getWorkflow(name)`: Method to get a workflow
-    - `getAgent(name)`: Method to get an agent
-    - `registerAgent(name, agent)`: Method to add an agent
-    - `registerWorkflow(name, workflow)`: Method to add a workflow
-
-## Shared Utilities
-
-### Logger
-
-#### `createLogger(config?: LoggerConfig): Logger`
-
-Creates a new logger instance.
-
-```typescript
-import { createLogger } from 'astor-agentic';
-
-const logger = createLogger({
-  level: 'debug',
-  colors: true,
-  timestamp: true
-});
-```
-
-**Parameters:**
-- `config` (optional): The logger configuration object
-    - `level`: Log level ('debug', 'info', 'warn', 'error')
-    - `colors`: Enable colored output
-    - `compact`: Use compact output format
-    - `timestamp`: Include timestamps
-
-**Returns:**
-- A `Logger` object with methods:
-    - `debug(message, ...args)`
-    - `info(message, ...args)`
-    - `warn(message, ...args)`
-    - `error(message, ...args)`
-    - `success(message, ...args)`
-    - `fatal(message, ...args)`
-    - `trace(message, ...args)`
-
-### Configuration
-
-#### `config`
-
-Global configuration object loaded from environment variables.
-
-```typescript
-import { config } from 'astor-agentic';
-
-console.log(config.defaultModel);
-```
-
-**Properties:**
-- `openAiKey`: OpenAI API key
-- `environment`: Runtime environment ('development', 'production', 'test')
-- `logLevel`: Default log level ('debug', 'info', 'warn', 'error')
-- `defaultModel`: Default LLM model
-- `batchConcurrency`: Maximum concurrent operations (1-10)
-
-## Types
-
-### Agent Types
-
-```typescript
-type Message = {
-  role: string;
-  content: string;
-};
-
-type StreamResponse = {
-  textStream: AsyncIterable<string>;
-};
-
-type ModelProvider = {
-  stream: (messages: Message[]) => Promise<StreamResponse>;
-};
-
-type AgentConfig = {
-  name: string;
-  instructions: string;
-  model: ModelProvider;
-};
-
-type Agent = {
-  config: AgentConfig;
-  stream: (messages: Message[]) => Promise<StreamResponse>;
-};
-
-type OpenAIConfig = {
-  apiKey?: string;
-  baseUrl?: string;
-  organization?: string;
-  temperature?: number;
-  maxTokens?: number;
-};
-```
-
-### Step Types
-
-```typescript
-type Context = {
-  getStepResult: (stepId: string) => any;
-  setStepResult: (stepId: string, result: any) => void;
-};
-
-type StepConfig = {
-  id: string;
-  description: string;
-  inputSchema?: z.ZodType;
-  execute: (params: { input?: any; context?: Context }) => Promise<any>;
-};
-
-type Step = {
-  config: StepConfig;
-  execute: (params: { input?: any; context?: Context }) => Promise<any>;
-};
-```
-
-### Workflow Types
-
-```typescript
-type StepReference = {
-  step: string;
-  path?: string;
-};
-
-type ConditionalQuery = {
-  $eq?: any;
-  $neq?: any;
-  $gt?: number;
-  $gte?: number;
-  $lt?: number;
-  $lte?: number;
-  $in?: any[];
-  $nin?: any[];
-  $exists?: boolean;
-  $and?: ConditionalQuery[];
-  $or?: ConditionalQuery[];
-};
-
-type StepCondition = {
-  ref: StepReference;
-  query: ConditionalQuery;
-};
-
-type VariableMapping = {
-  [key: string]: StepReference | any;
-};
-
-type StepOptions = {
-  when?: StepCondition;
-  variables?: VariableMapping;
-};
-
-type WorkflowConfig = {
-  name: string;
-  triggerSchema?: z.ZodType;
-  logger?: Logger;
-};
-
-type Workflow = {
-  config: WorkflowConfig;
-  steps: Step[];
-  dependencies: Record<string, string[]>;
-  conditions: Record<string, StepCondition>;
-  variables: Record<string, VariableMapping>;
-  currentDependency: string | null;
+// Run the workflow
+async function main() {
+  const run = workflow.createRun();
+  const result = await run.run({
+    triggerData: {
+      message: 'What are three interesting facts about quantum computing?'
+    }
+  });
   
-  step: (stepDefinition: Step, options?: StepOptions) => Workflow;
-  then: (stepDefinition: Step, options?: StepOptions) => Workflow;
-  after: (stepId: string | string[]) => Workflow;
-  createRun: () => { run: (params: { triggerData: any }) => Promise<{ results: Record<string, any> }> };
-  commit: () => Workflow;
-};
-```
-
-### Tool Types
-
-```typescript
-type ToolDefinition = {
-  name: string;
-  description: string;
-  parameters: z.ZodType;
-  execute: (params: any) => Promise<any>;
-};
-
-type Tool = {
-  definition: ToolDefinition;
-  execute: (params: any) => Promise<any>;
-};
-
-type ToolkitConfig = {
-  name: string;
-  description?: string;
-  logger?: Logger;
-};
-
-type Toolkit = {
-  config: ToolkitConfig;
-  tools: Record<string, Tool>;
-  addTool: (tool: Tool) => Toolkit;
-  getTool: (name: string) => Tool | undefined;
-  getToolsSchema: () => Record<string, any>;
-};
-```
-
-### Chain Types
-
-```typescript
-type ChainConfig = {
-  agents?: Record<string, Agent>;
-  workflows?: Record<string, Workflow>;
-  logger?: Logger;
-};
-
-type Chain = {
-  config: ChainConfig;
-  agents: Record<string, Agent>;
-  workflows: Record<string, Workflow>;
-  getWorkflow: (name: string) => Workflow | undefined;
-  getAgent: (name: string) => Agent | undefined;
-  registerAgent: (name: string, agent: Agent) => void;
-  registerWorkflow: (name: string, workflow: Workflow) => void;
-};
-```
-
-### Logger Types
-
-```typescript
-type LogLevel = 'silent' | 'fatal' | 'error' | 'warn' | 'info' | 'success' | 'debug' | 'trace';
-
-type LoggerConfig = {
-  level?: LogLevel;
-  colors?: boolean;
-  compact?: boolean;
-  timestamp?: boolean;
-};
-
-interface Logger {
-  debug(message: string, ...args: any[]): void;
-  info(message: string, ...args: any[]): void;
-  warn(message: string, ...args: any[]): void;
-  error(message: string, ...args: any[]): void;
-  success(message: string, ...args: any[]): void;
-  fatal(message: string, ...args: any[]): void;
-  trace(message: string, ...args: any[]): void;
+  console.log(result.results['generate-response'].response);
 }
+
+main().catch(console.error);
 ```
 
-## Examples
+## Creating Custom Workflows
 
-Astor comes with several example files to help you get started:
+```typescript
+import Astor from 'astor';
+import { z } from 'zod';
 
-- **simple.example.ts**: Basic workflow with an agent that processes a query and generates a response
-- **tools.example.ts**: Demonstrates how to create and use custom tools with an agent
-- **agents.example.ts**: Shows how to create specialized agents with different instructions and models
-- **chain.example.ts**: Illustrates combining agents and workflow steps in a chain for content enhancement
-- **agents-and-tools.example.ts**: Example of a single agent using multiple tools for research and translation
+const astor = new Astor({
+  openAIKey: Bun.env.OPENAI_API_KEY
+});
 
-Run any example with:
+// Define a schema for structured data
+const recipeSchema = z.object({
+  name: z.string(),
+  ingredients: z.array(z.object({
+    name: z.string(),
+    amount: z.string(),
+    unit: z.string().optional()
+  })),
+  steps: z.array(z.string()),
+  prepTime: z.number(),
+  cookTime: z.number()
+});
 
-```bash
-bun examples/simple.example.ts
+// Create a custom workflow
+const recipeWorkflow = astor.Workflow({
+  name: 'Recipe Generator',
+  triggerSchema: z.object({
+    cuisine: z.string(),
+    dietary: z.string().optional(),
+    mealType: z.enum(['breakfast', 'lunch', 'dinner', 'dessert'])
+  })
+})
+// First step: generate recipe ideas
+.step(astor.TextStep({
+  id: 'generate-ideas',
+  description: 'Generate recipe ideas',
+  model: astor.openai('gpt-4o'),
+  systemPrompt: 'You are a chef specialized in various cuisines.'
+}), {
+  variables: {
+    message: { step: 'trigger', path: 'cuisine' }
+  }
+})
+// Second step: create structured recipe data
+.then(astor.ObjectStep({
+  id: 'generate-recipe',
+  description: 'Generate a structured recipe',
+  model: astor.openai('gpt-4o'),
+  schema: recipeSchema,
+  systemPrompt: 'You are a recipe writer creating detailed recipes.'
+}), {
+  variables: {
+    message: { step: 'generate-ideas', path: 'response' }
+  }
+})
+.commit();
+
+// Run the workflow
+async function main() {
+  const run = recipeWorkflow.createRun();
+  const result = await run.run({
+    triggerData: {
+      cuisine: 'Italian',
+      dietary: 'vegetarian',
+      mealType: 'dinner'
+    }
+  });
+  
+  const recipe = result.results['generate-recipe'].response;
+  console.log(`Recipe: ${recipe.name}`);
+  console.log(`Prep Time: ${recipe.prepTime} minutes`);
+  console.log(`Cook Time: ${recipe.cookTime} minutes`);
+  
+  console.log('Ingredients:');
+  recipe.ingredients.forEach(ing => {
+    console.log(`- ${ing.amount} ${ing.unit || ''} ${ing.name}`);
+  });
+  
+  console.log('Steps:');
+  recipe.steps.forEach((step, i) => {
+    console.log(`${i+1}. ${step}`);
+  });
+}
+
+main().catch(console.error);
 ```
 
-These examples demonstrate key patterns and best practices for building with Astor, including:
-- Proper workflow structuring
-- Tool creation and usage
-- Agent specialization
-- Chain organization
-- Visual logging and progress tracking
+## Creating and Using Tools
+
+```typescript
+import Astor from 'astor';
+import { z } from 'zod';
+
+const astor = new Astor({
+  openAIKey: Bun.env.OPENAI_API_KEY
+});
+
+// Create an AI-powered tool
+const nutritionTool = astor.AITool({
+  name: 'analyze-nutrition',
+  description: 'Analyze the nutritional content of ingredients',
+  parameters: z.object({
+    ingredients: z.array(z.string()),
+    servings: z.number().default(1)
+  }),
+  model: astor.openai('gpt-4o-mini'),
+  systemPrompt: 'You are a nutritionist specializing in food analysis.'
+});
+
+// Use the tool
+async function main() {
+  const result = await nutritionTool.execute({
+    ingredients: [
+      '200g pasta',
+      '150g spinach',
+      '100g feta cheese',
+      '2 tbsp olive oil'
+    ],
+    servings: 2
+  });
+  
+  console.log(result.result);
+}
+
+main().catch(console.error);
+```
+
+## Advanced Features
+
+### Parallel Execution
+
+```typescript
+const workflow = astor.Workflow({
+  name: 'Parallel Processing'
+})
+.step(initialStep)
+// Run these steps in parallel after the initial step
+.after('initial-step').step(stepA)
+.after('initial-step').step(stepB)
+// This step waits for both stepA and stepB to complete
+.after(['step-a', 'step-b']).step(finalStep)
+.commit();
+```
+
+### Conditional Execution
+
+```typescript
+const workflow = astor.Workflow({
+  name: 'Conditional Workflow'
+})
+.step(analyzeStep)
+// Only run this step if condition is met
+.step(specialStep, {
+  when: {
+    ref: { step: 'analyze', path: 'sentiment' },
+    query: { $eq: 'positive' }
+  }
+})
+.commit();
+```
+
+### Custom Steps
+
+```typescript
+const customStep = astor.Step({
+  id: 'custom-processor',
+  description: 'Custom data processing step',
+  execute: async ({ input, context }) => {
+    // Custom processing logic here
+    return {
+      processed: true,
+      data: input.data.map(item => item.toUpperCase())
+    };
+  }
+});
+```
+
+## Why Astor?
+
+- **Simplified AI Development**: Build complex AI workflows without the boilerplate
+- **Composable**: Chain together steps and tools to create sophisticated pipelines
+- **Maintainable**: Logical separation of concerns keeps your code clean
+- **Testable**: Each step can be tested independently
+- **Reproducible**: Workflows execute consistently with deterministic results
+- **Future-Proof**: Uses the AI SDK for model interactions, keeping up with the latest AI capabilities
+
+## License
+
+MIT

@@ -1,71 +1,34 @@
-// Core functionality
+import Astor from "./astor.core.ts";
+
+export { Step } from "./step.core";
+export { Workflow } from "./workflow.core";
+export { Tool, Toolkit } from "./tools.core";
+export { Chain } from "./chain.core";
 export {
-	createAgent,
-	openai,
-} from "./agent.core";
-
-export { createStep } from "./step.core";
-
-export { createWorkflow } from "./workflow.core";
-
-export { createChain } from "./chain.core";
-
-export {
-	createTool,
-	createToolkit,
-	handleToolCalls,
-} from "./tools.core";
-
-// Shared utilities
-export {
-	createLogger,
-	logger,
-} from "./shared/logger.shared";
-
-export { default as config } from "./shared/config.shared";
-
-// Type exports
+	TextStep,
+	ObjectStep,
+	StreamTextStep,
+	AITool,
+	AIObjectTool,
+} from "./ai.core";
+export { createLogger } from "./shared/logger.shared";
+export type { Context, Step as StepType, StepConfig } from "./step.core";
 export type {
-	Message,
-	StreamResponse,
-	StreamOptions,
-	ModelProvider,
-	Agent,
-	AgentConfig,
-	OpenAIConfig,
-} from "./agent.core";
-
-export type {
-	Context,
-	Step,
-	StepConfig,
-} from "./step.core";
-
-export type {
-	Workflow,
+	Workflow as WorkflowType,
 	WorkflowConfig,
+	StepOptions,
 	StepReference,
 	StepCondition,
-	ConditionalQuery,
 	VariableMapping,
-	StepOptions,
+	ConditionalQuery,
 } from "./workflow.core";
-
 export type {
-	Chain,
-	ChainConfig,
-} from "./chain.core";
-
-export type {
-	Tool,
+	Tool as ToolType,
 	ToolDefinition,
-	Toolkit,
+	Toolkit as ToolkitType,
 	ToolkitConfig,
-	ToolHandlerOptions,
 } from "./tools.core";
+export type { Chain as ChainType, ChainConfig } from "./chain.core";
+export type { AstorConfig } from "./astor.core.ts";
 
-export type {
-	Logger,
-	LoggerConfig,
-	LogLevel,
-} from "./shared/logger.shared";
+export default Astor;

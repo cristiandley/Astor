@@ -1,45 +1,44 @@
 import type { Logger } from "@shared/logger.shared";
-import type { Agent } from "@src/agent.core";
-import type { Workflow } from "@src/workflow.core";
+import type { Workflow } from "./workflow.core";
 
-export type ChainConfig = {
-	agents?: Record<string, Agent>;
+/**
+ * Chain configuration
+ */
+export interface ChainConfig {
+	name: string;
 	workflows?: Record<string, Workflow>;
 	logger?: Logger;
-};
+}
 
-export type Chain = {
-	config: ChainConfig;
-	agents: Record<string, Agent>;
+/**
+ * Chain implementation
+ */
+export interface Chain {
+	name: string;
 	workflows: Record<string, Workflow>;
-	getWorkflow: (name: string) => Workflow | undefined;
-	getAgent: (name: string) => Agent | undefined;
-	registerAgent: (name: string, agent: Agent) => void;
-	registerWorkflow: (name: string, workflow: Workflow) => void;
-};
 
-export function createChain(config: ChainConfig): Chain {
-	const chain: Chain = {
-		config,
-		agents: config.agents || {},
-		workflows: config.workflows || {},
+	getWorkflow(name: string): Workflow | undefined;
+	addWorkflow(name: string, workflow: Workflow): Chain;
+}
 
-		getWorkflow(name: string) {
-			return chain.workflows[name];
+/**
+ * Creates a chain of workflows
+ */
+export function Chain({ name, workflows = {}, logger }: ChainConfig): Chain {
+	return {
+		name,
+		workflows,
+
+		getWorkflow(workflowName: string) {
+			return workflows[workflowName];
 		},
 
-		getAgent(name: string) {
-			return chain.agents[name];
-		},
-
-		registerAgent(name: string, agent: Agent) {
-			chain.agents[name] = agent;
-		},
-
-		registerWorkflow(name: string, workflow: Workflow) {
-			chain.workflows[name] = workflow;
+		addWorkflow(workflowName: string, workflow: Workflow) {
+			workflows[workflowName] = workflow;
+			if (logger) {
+				logger.debug(`Added workflow ${workflowName} to chain ${name}`);
+			}
+			return this;
 		},
 	};
-
-	return chain;
 }
