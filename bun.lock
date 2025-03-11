@@ -4,6 +4,7 @@
     "": {
       "name": "cantara-chain",
       "dependencies": {
+        "astor-agentic": "^0.2.1",
         "consola": "^3.4.0",
         "zod": "^3.24.2",
       },
@@ -38,6 +39,8 @@
     "@types/node": ["@types/node@22.13.9", "", { "dependencies": { "undici-types": "~6.20.0" } }, "sha512-acBjXdRJ3A6Pb3tqnw9HZmyR3Fiol3aGxRCK1x3d+6CDAMjl7I649wpSd+yNURCjbOUGu9tqtLKnTGxmK6CyGw=="],
 
     "@types/ws": ["@types/ws@8.5.14", "", { "dependencies": { "@types/node": "*" } }, "sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw=="],
+
+    "astor-agentic": ["astor-agentic@0.2.1", "", { "dependencies": { "consola": "^3.4.0", "zod": "^3.24.2" } }, "sha512-qnP+jT++H86dKpvhE0zj6kLiTSNP8QXKjCUxLnm2ZXlG6YOOtUZkCjbQGyXnLu+ciPNaQJQJ9Pwvh4fN88MqWw=="],
 
     "bun-types": ["bun-types@1.2.4", "", { "dependencies": { "@types/node": "*", "@types/ws": "~8.5.10" } }, "sha512-nDPymR207ZZEoWD4AavvEaa/KZe/qlrbMSchqpQwovPZCKc7pwMoENjEtHgMKaAjJhy+x6vfqSBA1QU3bJgs0Q=="],
 

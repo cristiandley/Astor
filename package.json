@@ -18,11 +18,7 @@
 			}
 		}
 	},
-	"files": [
-		"dist",
-		"README.md",
-		"LICENSE"
-	],
+	"files": ["dist", "README.md", "LICENSE"],
 	"scripts": {
 		"clean": "rm -rf dist",
 		"build:types": "tsc -p tsconfig.types.json",
@@ -49,6 +45,7 @@
 		"url": "git+https://github.com/cristiandley/astor.git"
 	},
 	"dependencies": {
+		"@ai-sdk/openai": "^1.0.0",
 		"consola": "^3.4.0",
 		"zod": "^3.24.2"
 	},
